@@ -58,6 +58,7 @@ class PieMenuState extends State<PieMenu> with SingleTickerProviderStateMixin {
   Size? _size;
 
   Duration get _bounceDuration => _theme.menuBounceDuration;
+  Timer? _timer;
 
   /// Controls [_bounceAnimation].
   late final AnimationController _bounceController = AnimationController(
@@ -125,6 +126,9 @@ class PieMenuState extends State<PieMenu> with SingleTickerProviderStateMixin {
   @override
   void dispose() {
     _bounceController.dispose();
+    if (_timer != null) {
+      _timer?.cancel();
+    }
     super.dispose();
   }
 
@@ -155,27 +159,31 @@ class PieMenuState extends State<PieMenu> with SingleTickerProviderStateMixin {
 
         _offset = event.position;
 
-        if (!_canvas.menuActive) {
-          if (_theme.delayDuration == Duration.zero) {
-            widget.onTap?.call();
-          }
+        _timer = Timer(Duration(seconds: 1), () {
+          if (_canTap) {
+            if (!_canvas.menuActive) {
+              if (_theme.delayDuration == Duration.zero) {
+                widget.onTap?.call();
+              }
 
-          if (_theme.bouncingMenu) {
-            _bouncing = true;
-            _bounceStopwatch.start();
-            _bounceController.forward();
-          }
+              if (_theme.bouncingMenu) {
+                _bouncing = true;
+                _bounceStopwatch.start();
+                _bounceController.forward();
+              }
 
-          _canvas.attachMenu(
-            offset: _offset,
-            state: this,
-            child: _bouncingChild,
-            renderBox: context.findRenderObject() as RenderBox,
-            actions: widget.actions,
-            theme: widget.theme,
-            onMenuToggle: widget.onToggle,
-          );
-        }
+              _canvas.attachMenu(
+                offset: _offset,
+                state: this,
+                child: _bouncingChild,
+                renderBox: context.findRenderObject() as RenderBox,
+                actions: widget.actions,
+                theme: widget.theme,
+                onMenuToggle: widget.onToggle,
+              );
+            }
+          }
+        });
       },
       onPointerMove: (event) {
         if ((event.position - _offset).distance > _theme.pointerSize / 2) {
@@ -186,6 +194,8 @@ class PieMenuState extends State<PieMenu> with SingleTickerProviderStateMixin {
         if (_canTap && _offset == event.position) {
           widget.onTap?.call();
         }
+        _timer?.cancel();
+        print('타이머 캔슬합니다.');
         debounce();
       },
       child: Opacity(
