@@ -224,9 +224,12 @@ class PieCanvasOverlayState extends State<PieCanvasOverlay>
         children: [
           Listener(
             behavior: HitTestBehavior.translucent,
-            onPointerDown: (event) => _pointerDown(event.position),
-            onPointerMove: (event) => _pointerMove(event.position),
-            onPointerUp: (event) => _pointerUp(event.position),
+            onPointerDown: (event) =>
+                menuActive ? _pointerDown(event.position) : null,
+            onPointerMove: (event) =>
+                menuActive ? _pointerMove(event.position) : null,
+            onPointerUp: (event) =>
+                menuActive ? _pointerUp(event.position) : null,
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
                 physics:
@@ -432,6 +435,7 @@ class PieCanvasOverlayState extends State<PieCanvasOverlay>
   }
 
   void _pointerDown(Offset offset) {
+    print('포인트다운');
     if (menuActive) {
       _pressedAgain = true;
       _pointerMove(offset);
@@ -450,10 +454,11 @@ class PieCanvasOverlayState extends State<PieCanvasOverlay>
         menuState?.setVisibility(true);
         toggleMenu(false);
         setState(() => menuActive = false);
-
+        print('인사이드 디테치');
         _detachMenu();
       }
     } else {
+      print('아웃사이드 디테치');
       _detachMenu();
     }
 
