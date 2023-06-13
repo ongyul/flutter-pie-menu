@@ -159,7 +159,7 @@ class PieMenuState extends State<PieMenu> with SingleTickerProviderStateMixin {
 
         _offset = event.position;
 
-        _timer = Timer(Duration(seconds: 1), () {
+        _timer = Timer(Duration(milliseconds: 600), () {
           if (_canTap) {
             if (!_canvas.menuActive) {
               if (_theme.delayDuration == Duration.zero) {
