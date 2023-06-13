@@ -182,22 +182,11 @@ class PieMenuState extends State<PieMenu> with SingleTickerProviderStateMixin {
           }
         }
       },
-      onPanStart: (details) {
-        _canTap = true;
-        _offset = details.globalPosition;
-      },
-      onPanUpdate: (details) {
-        if ((details.globalPosition - _offset).distance >
-            _theme.pointerSize / 2) {
-          debounce();
-        }
-      },
       onLongPressEnd: (details) {
         if (_canTap && _offset == details.globalPosition) {
           widget.onTap?.call();
         }
         debounce();
-        print('롱프레스 끝');
       },
       child: Opacity(
         opacity: _childVisible ? 1 : 0,
