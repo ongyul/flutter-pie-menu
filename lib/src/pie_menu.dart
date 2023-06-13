@@ -152,51 +152,52 @@ class PieMenuState extends State<PieMenu> with SingleTickerProviderStateMixin {
       }
     });
 
-    return Listener(
+    return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (event) {
+      onLongPressStart: (details) {
+        // You can add the logic of your timer here
         _canTap = true;
-
-        _offset = event.position;
-
-        _timer = Timer(Duration(milliseconds: 600), () {
-          if (_canTap) {
-            if (!_canvas.menuActive) {
-              if (_theme.delayDuration == Duration.zero) {
-                widget.onTap?.call();
-              }
-
-              if (_theme.bouncingMenu) {
-                _bouncing = true;
-                _bounceStopwatch.start();
-                _bounceController.forward();
-              }
-
-              _canvas.attachMenu(
-                offset: _offset,
-                state: this,
-                child: _bouncingChild,
-                renderBox: context.findRenderObject() as RenderBox,
-                actions: widget.actions,
-                theme: widget.theme,
-                onMenuToggle: widget.onToggle,
-              );
+        _offset = details.globalPosition;
+        if (_canTap) {
+          if (!_canvas.menuActive) {
+            if (_theme.delayDuration == Duration.zero) {
+              widget.onTap?.call();
             }
+
+            if (_theme.bouncingMenu) {
+              _bouncing = true;
+              _bounceStopwatch.start();
+              _bounceController.forward();
+            }
+
+            _canvas.attachMenu(
+              offset: _offset,
+              state: this,
+              child: _bouncingChild,
+              renderBox: context.findRenderObject() as RenderBox,
+              actions: widget.actions,
+              theme: widget.theme,
+              onMenuToggle: widget.onToggle,
+            );
           }
-        });
+        }
       },
-      onPointerMove: (event) {
-        if ((event.position - _offset).distance > _theme.pointerSize / 2) {
+      onPanStart: (details) {
+        _canTap = true;
+        _offset = details.globalPosition;
+      },
+      onPanUpdate: (details) {
+        if ((details.globalPosition - _offset).distance >
+            _theme.pointerSize / 2) {
           debounce();
         }
       },
-      onPointerUp: (event) {
-        if (_canTap && _offset == event.position) {
+      onLongPressEnd: (details) {
+        if (_canTap && _offset == details.globalPosition) {
           widget.onTap?.call();
         }
-        _timer?.cancel();
-        print('타이머 캔슬합니다.');
         debounce();
+        print('롱프레스 끝');
       },
       child: Opacity(
         opacity: _childVisible ? 1 : 0,
